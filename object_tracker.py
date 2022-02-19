@@ -23,6 +23,9 @@ from deep_sort import preprocessing, nn_matching
 from deep_sort.detection import Detection
 from deep_sort.tracker import Tracker
 from tools import generate_detections as gdet
+from collections import defaultdict
+
+
 flags.DEFINE_string('framework', 'tf', '(tf, tflite, trt')
 flags.DEFINE_string('weights', './checkpoints/yolov4-416',
                     'path to weights file')
@@ -91,6 +94,10 @@ def main(_argv):
         out = cv2.VideoWriter(FLAGS.output, codec, fps, (width, height))
 
     frame_num = 0
+
+    object_count = defaultdict(int)
+    existing_trackers = set()
+
     # while video is running
     while True:
         return_value, frame = vid.read()
@@ -165,6 +172,8 @@ def main(_argv):
         # loop through objects and use class index to get class name, allow only classes in allowed_classes list
         names = []
         deleted_indx = []
+
+
         for i in range(num_objects):
             class_indx = int(classes[i])
             class_name = class_names[class_indx]
@@ -213,11 +222,25 @@ def main(_argv):
             cv2.rectangle(frame, (int(bbox[0]), int(bbox[1])), (int(bbox[2]), int(bbox[3])), color, 2)
             cv2.rectangle(frame, (int(bbox[0]), int(bbox[1]-30)), (int(bbox[0])+(len(class_name)+len(str(track.track_id)))*17, int(bbox[1])), color, -1)
             cv2.putText(frame, class_name + "-" + str(track.track_id),(int(bbox[0]), int(bbox[1]-10)),0, 0.75, (255,255,255),2)
+            
 
-        # if enable info flag then print details about each track
+            if track.track_id not in existing_trackers:
+                object_count[class_name] += 1
+                existing_trackers.add(track.track_id)
+
+
+
+            # if enable info flag then print details about each track
             if FLAGS.info:
                 print("Tracker ID: {}, Class: {},  BBox Coords (xmin, ymin, xmax, ymax): {}".format(str(track.track_id), class_name, (int(bbox[0]), int(bbox[1]), int(bbox[2]), int(bbox[3]))))
 
+
+        print(object_count)
+        y = 30
+        for each_class,each_count in object_count.items():
+            cv2.putText(frame, each_class + "-" + str(each_count),(0,y),0,1, (0,0,0),2)
+            y+=30
+        
         # calculate frames per second of running detections
         fps = 1.0 / (time.time() - start_time)
         print("FPS: %.2f" % fps)
@@ -231,6 +254,8 @@ def main(_argv):
         if FLAGS.output:
             out.write(result)
         if cv2.waitKey(1) & 0xFF == ord('q'): break
+
+    print("Total object count in the video is ",object_count)
     cv2.destroyAllWindows()
 
 if __name__ == '__main__':

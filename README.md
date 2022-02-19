@@ -2,6 +2,19 @@
 [![license](https://img.shields.io/github/license/mashape/apistatus.svg)](LICENSE)
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1zmeSTP3J5zu2d5fHgsQC06DyYEYJFXq1?usp=sharing)
 
+This repo counts the number of objects in the input video.
+### Output video screenshot.
+Displays objects in top left side of frame
+<p align="center"><img src="data/helpers/output2_ss.png"\></p>
+<p align="center"><img src="data/helpers/output1_ss.png"\></p>
+
+Approch:
+1. Forked the repo from AI guys which implements the deepsort tracking.
+2. Did modification in the code to count num of objects in each class and display it in the video.
+
+The full output video can be found at outputs/output1.avi and outputs/output2.avi
+
+## Readme of deepsort repo.
 Object tracking implemented with YOLOv4, DeepSort, and TensorFlow. YOLOv4 is a state of the art algorithm that uses deep convolutional neural networks to perform object detections. We can take the output of YOLOv4 feed these object detections into Deep SORT (Simple Online and Realtime Tracking with a Deep Association Metric) in order to create a highly accurate object tracker.
 
 ## Demo of Object Tracker on Persons
